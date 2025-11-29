@@ -20,7 +20,7 @@ final class FloorplanBuilder {
 
     // MARK: - Helpers
 
-    private func buildWalls(from walls: [CapturedRoom.Wall]) -> [WallSegment2D] {
+    private func buildWalls(from walls: [CapturedRoom.Surface]) -> [WallSegment2D] {
         walls.compactMap { wall in
             let points = wall.curve.points
             guard let first = points.first, let last = points.last else { return nil }
@@ -68,7 +68,7 @@ final class FloorplanBuilder {
 
             return FurnitureItem2D(
                 id: object.identifier,
-                name: object.category.rawValue.capitalized,
+                name: String(describing: object.category).capitalized,
                 category: category,
                 size: size,
                 height: CGFloat(object.dimensions.y),
@@ -85,8 +85,6 @@ final class FloorplanBuilder {
         case .sofa: return .sofa
         case .chair: return .chair
         case .table: return .table
-        case .cabinet: return .cabinet
-        case .desk: return .desk
         default: return .other
         }
     }
