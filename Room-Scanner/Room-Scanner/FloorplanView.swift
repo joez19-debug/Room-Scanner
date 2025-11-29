@@ -8,9 +8,10 @@ struct FloorplanView: View {
     @State private var baseZoom: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
+    @State private var hasInitializedView = false
 
     var body: some View {
-        GeometryReader { _ in
+        GeometryReader { geo in
             Canvas { context, size in
                 let midX = model.bounds.midX
                 let midY = model.bounds.midY
@@ -25,6 +26,18 @@ struct FloorplanView: View {
                 drawFurniture(in: &context, transform: transform)
             }
             .gesture(dragGesture().simultaneously(with: magnificationGesture()))
+            .onAppear {
+                if !hasInitializedView {
+                    resetView(for: geo.size)
+                    hasInitializedView = true
+                }
+            }
+            .onChange(of: model.bounds) { _ in
+                if !hasInitializedView {
+                    resetView(for: geo.size)
+                    hasInitializedView = true
+                }
+            }
         }
     }
 
@@ -106,6 +119,30 @@ struct FloorplanView: View {
         let dx = Double(b.x - a.x)
         let dy = Double(b.y - a.y)
         return sqrt(dx * dx + dy * dy)
+    }
+
+    private func resetView(for size: CGSize) {
+        let bounds = model.bounds
+        guard bounds.width > 0, bounds.height > 0 else { return }
+
+        let availableWidth = size.width
+        let availableHeight = size.height
+
+        let scaleX = availableWidth / bounds.width
+        let scaleY = availableHeight / bounds.height
+        let scale = 0.8 * min(scaleX, scaleY)
+
+        zoom = scale
+        baseZoom = scale
+
+        let planCenter = CGPoint(x: bounds.midX, y: bounds.midY)
+        let viewCenter = CGPoint(x: availableWidth / 2.0, y: availableHeight / 2.0)
+
+        offset = CGSize(
+            width: viewCenter.x - zoom * planCenter.x,
+            height: viewCenter.y - zoom * planCenter.y
+        )
+        lastOffset = offset
     }
 }
 
