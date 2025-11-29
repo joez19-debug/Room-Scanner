@@ -8,7 +8,20 @@ final class FloorplanBuilder {
     /// - Parameter capturedRoom: The room returned by RoomPlan.
     /// - Returns: A `FloorplanModel` containing projected walls, openings, and furniture.
     func build(from capturedRoom: CapturedRoom) -> FloorplanModel {
-        let walls = capturedRoom.walls.compactMap { wall -> WallSegment2D? in
+        let walls = buildWalls(from: capturedRoom.walls)
+        let openings = buildOpenings(from: capturedRoom.openings, walls: walls)
+        let furniture = buildFurniture(from: capturedRoom.objects)
+
+        let allPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] } + openings.map { $0.center } + furniture.map { $0.position }
+        let bounds = boundingBox(for: allPoints)
+
+        return FloorplanModel(bounds: bounds, walls: walls, openings: openings, furniture: furniture)
+    }
+
+    // MARK: - Helpers
+
+    private func buildWalls(from walls: [CapturedRoom.Wall]) -> [WallSegment2D] {
+        walls.compactMap { wall in
             let points = wall.curve.points
             guard let first = points.first, let last = points.last else { return nil }
             let start = projectToPlan(first)
@@ -22,8 +35,10 @@ final class FloorplanBuilder {
                 isStructural: true
             )
         }
+    }
 
-        let openings = capturedRoom.openings.map { opening -> Opening2D in
+    private func buildOpenings(from openings: [CapturedRoom.Opening], walls: [WallSegment2D]) -> [Opening2D] {
+        openings.map { opening in
             let center = projectToPlan(opening.transform.columns.3)
             let width = CGFloat(opening.dimensions.x)
             let nearestWallId = nearestWall(for: center, in: walls)?.id
@@ -42,8 +57,10 @@ final class FloorplanBuilder {
                 wallId: nearestWallId
             )
         }
+    }
 
-        let furniture = capturedRoom.objects.map { object -> FurnitureItem2D in
+    private func buildFurniture(from objects: [CapturedRoom.Object]) -> [FurnitureItem2D] {
+        objects.map { object in
             let center = projectToPlan(object.transform.columns.3)
             let size = CGSize(width: CGFloat(object.dimensions.x), height: CGFloat(object.dimensions.z))
             let category = mapCategory(object.category)
@@ -60,14 +77,7 @@ final class FloorplanBuilder {
                 isLocked: true
             )
         }
-
-        let allPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] } + openings.map { $0.center } + furniture.map { $0.position }
-        let bounds = boundingBox(for: allPoints)
-
-        return FloorplanModel(bounds: bounds, walls: walls, openings: openings, furniture: furniture)
     }
-
-    // MARK: - Helpers
 
     private func mapCategory(_ category: CapturedRoom.Object.Category) -> FurnitureCategory {
         switch category {
