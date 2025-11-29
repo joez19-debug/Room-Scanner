@@ -7,15 +7,59 @@
 
 import SwiftUI
 
+private enum Route: Hashable {
+    case scan
+    case project(RoomProject)
+}
+
 struct ContentView: View {
+    @StateObject private var projectStore: ProjectStore
+    @State private var path: [Route] = []
+
+    init(projectStore: ProjectStore = ProjectStore()) {
+        _projectStore = StateObject(wrappedValue: projectStore)
+    }
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack(path: $path) {
+            List {
+                Section("Projects") {
+                    if projectStore.projects.isEmpty {
+                        Text("No projects yet")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(projectStore.projects) { project in
+                            NavigationLink(project.name, value: Route.project(project))
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Room Scanner")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: startNewScan) {
+                        Label("New Scan", systemImage: "plus")
+                    }
+                }
+            }
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .scan:
+                    RoomScanScreen(onFinished: handleScanFinished)
+                case .project(let project):
+                    ProjectDetailView(project: project)
+                }
+            }
         }
-        .padding()
+    }
+
+    private func startNewScan() {
+        path.append(.scan)
+    }
+
+    private func handleScanFinished(_ project: RoomProject) {
+        projectStore.projects.append(project)
+        path.append(.project(project))
     }
 }
 
