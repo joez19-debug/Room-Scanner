@@ -1,5 +1,4 @@
 import Foundation
-import Combine
 import RoomPlan
 
 final class RoomScanViewModel: ObservableObject {
