@@ -9,8 +9,16 @@ final class FloorplanBuilder {
     /// - Parameter capturedRoom: The room returned by RoomPlan.
     /// - Returns: A `FloorplanModel` containing projected walls, openings, and furniture.
     func build(from capturedRoom: CapturedRoom) -> FloorplanModel {
-        let walls = buildWalls(from: capturedRoom.walls)
-        let openings = buildOpenings(from: capturedRoom.openings, walls: walls)
+        let wallSurfaces = capturedRoom.surfaces.filter { surface in
+            String(describing: surface.category).lowercased() == "wall"
+        }
+        let openingSurfaces = capturedRoom.surfaces.filter { surface in
+            let name = String(describing: surface.category).lowercased()
+            return name.contains("door") || name.contains("window") || name.contains("opening")
+        }
+
+        let walls = buildWalls(from: wallSurfaces)
+        let openings = buildOpenings(from: openingSurfaces, walls: walls)
         let furniture = buildFurniture(from: capturedRoom.objects)
 
         let allPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] } + openings.map { $0.center } + furniture.map { $0.position }
