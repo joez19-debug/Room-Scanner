@@ -40,7 +40,8 @@ struct FloorplanView: View {
             let midpoint = CGPoint(x: (wall.start.x + wall.end.x) / 2, y: (wall.start.y + wall.end.y) / 2)
             let labelPosition = midpoint.applying(transform)
             let length = distance(from: wall.start, to: wall.end)
-            let label = lengthFormatter.string(fromValue: length, unit: .meter)
+            let measurement = Measurement(value: length, unit: UnitLength.meters)
+            let label = lengthFormatter.string(from: measurement)
             let text = Text(label).font(.caption2)
             context.draw(text, at: labelPosition, anchor: .center)
         }
