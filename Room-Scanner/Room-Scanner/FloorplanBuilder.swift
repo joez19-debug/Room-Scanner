@@ -18,10 +18,20 @@ final class FloorplanBuilder {
         let openings = buildOpenings(from: openingSurfaces, walls: walls)
         let furniture = buildFurniture(from: capturedRoom.objects)
 
-        let initialPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] } + openings.map { $0.center } + furniture.map { $0.position }
-        let initialBounds = boundingBox(for: initialPoints)
-        let pivot = CGPoint(x: initialBounds.midX, y: initialBounds.midY)
-        let planRotation = dominantRotation(for: walls)
+        let unrotatedPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] } + openings.map { $0.center } + furniture.map { $0.position }
+        let unrotatedBounds = boundingBox(for: unrotatedPoints)
+        let unrotatedModel = FloorplanModel(bounds: unrotatedBounds, walls: walls, openings: openings, furniture: furniture)
+
+        guard !walls.isEmpty else { return unrotatedModel }
+
+        let wallPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] }
+        let wallBounds = boundingBox(for: wallPoints)
+        let pivot = CGPoint(x: wallBounds.midX, y: wallBounds.midY)
+
+        guard let mainWall = walls.max(by: { $0.length < $1.length }) else { return unrotatedModel }
+        let dx = mainWall.end.x - mainWall.start.x
+        let dy = mainWall.end.y - mainWall.start.y
+        let planRotation = -atan2(dy, dx)
 
         let rotatedWalls = walls.map { wall -> WallSegment2D in
             var rotatedWall = wall
@@ -185,19 +195,5 @@ final class FloorplanBuilder {
             x: origin.x + tx * c - ty * s,
             y: origin.y + tx * s + ty * c
         )
-    }
-
-    private func dominantRotation(for walls: [WallSegment2D]) -> CGFloat {
-        guard let mainWall = walls.max(by: { wallLength($0) < wallLength($1) }) else { return 0 }
-        let dx = mainWall.end.x - mainWall.start.x
-        let dy = mainWall.end.y - mainWall.start.y
-        let angle = atan2(dy, dx)
-        return -angle
-    }
-
-    private func wallLength(_ wall: WallSegment2D) -> CGFloat {
-        let dx = wall.end.x - wall.start.x
-        let dy = wall.end.y - wall.start.y
-        return hypot(dx, dy)
     }
 }
