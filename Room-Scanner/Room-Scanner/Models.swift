@@ -4,7 +4,7 @@ import CoreGraphics
 // MARK: - Core Entities
 
 /// Project-level metadata and asset references for a scanned room.
-struct RoomProject: Identifiable, Codable {
+struct RoomProject: Identifiable, Codable, Hashable {
     let id: UUID
     var name: String
     var createdAt: Date
