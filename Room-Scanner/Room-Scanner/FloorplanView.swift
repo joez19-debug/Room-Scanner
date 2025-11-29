@@ -103,12 +103,16 @@ struct FloorplanView: View {
 
     private func drawFurniture(in context: inout GraphicsContext, transform: CGAffineTransform) {
         for item in model.furniture {
-            let position = item.position.applying(transform)
-            let size = CGSize(width: item.size.width * zoom, height: item.size.height * zoom)
-            var rect = CGRect(origin: .zero, size: size)
-            rect.origin = CGPoint(x: position.x - size.width / 2, y: position.y - size.height / 2)
+            let center = item.position.applying(transform)
+            let width = item.size.width * zoom
+            let height = item.size.height * zoom
+            let rect = CGRect(
+                x: center.x - width / 2.0,
+                y: center.y - height / 2.0,
+                width: width,
+                height: height
+            )
             var path = Path(rect)
-            path = path.applying(CGAffineTransform(translationX: position.x - rect.midX, y: position.y - rect.midY))
             context.stroke(path, with: .color(.blue), lineWidth: 1)
         }
     }
