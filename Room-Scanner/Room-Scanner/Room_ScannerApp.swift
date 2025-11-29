@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct Room_ScannerApp: App {
+    @StateObject private var projectStore = RoomProjectStore()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(projectStore)
+                .task {
+                    projectStore.loadProjects()
+                }
         }
     }
 }

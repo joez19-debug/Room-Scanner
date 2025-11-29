@@ -13,12 +13,8 @@ private enum Route: Hashable {
 }
 
 struct ContentView: View {
-    @StateObject private var projectStore: ProjectStore
+    @EnvironmentObject private var projectStore: RoomProjectStore
     @State private var path: [Route] = []
-
-    init(projectStore: ProjectStore = ProjectStore()) {
-        _projectStore = StateObject(wrappedValue: projectStore)
-    }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -58,11 +54,11 @@ struct ContentView: View {
     }
 
     private func handleScanFinished(_ project: RoomProject) {
-        projectStore.projects.append(project)
-        path.append(.project(project))
+        path = []
     }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(RoomProjectStore())
 }

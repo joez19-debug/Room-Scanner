@@ -1,32 +1,15 @@
 import SwiftUI
 import CoreGraphics
+import Foundation
 
 struct ProjectDetailView: View {
     let project: RoomProject
-
-    private var demoFloorplan: FloorplanModel {
-        let wall1 = WallSegment2D(id: UUID(), start: CGPoint(x: -2, y: -2), end: CGPoint(x: 2, y: -2), thickness: 0.1, isStructural: true)
-        let wall2 = WallSegment2D(id: UUID(), start: CGPoint(x: 2, y: -2), end: CGPoint(x: 2, y: 2), thickness: 0.1, isStructural: true)
-        let wall3 = WallSegment2D(id: UUID(), start: CGPoint(x: 2, y: 2), end: CGPoint(x: -2, y: 2), thickness: 0.1, isStructural: true)
-        let wall4 = WallSegment2D(id: UUID(), start: CGPoint(x: -2, y: 2), end: CGPoint(x: -2, y: -2), thickness: 0.1, isStructural: true)
-
-        let opening = Opening2D(id: UUID(), kind: .door, center: CGPoint(x: 0, y: -2), width: 0.9, wallId: wall1.id)
-        let furniture = FurnitureItem2D(id: UUID(), name: "Sofa", category: .sofa, size: CGSize(width: 1.6, height: 0.8), height: 0.9, position: CGPoint(x: 0, y: 0), rotation: 0, isLocked: false)
-
-        return FloorplanModel(
-            bounds: CGRect(x: -2.5, y: -2.5, width: 5, height: 5),
-            walls: [wall1, wall2, wall3, wall4],
-            openings: [opening],
-            furniture: [furniture]
-        )
-    }
+    @State private var floorplan: FloorplanModel?
+    @State private var floorplanError: String?
 
     var body: some View {
         TabView {
-            FloorplanView(model: demoFloorplan)
-                .tabItem {
-                    Label("2D Plan", systemImage: "square.grid.2x2")
-                }
+            floorplanTab
 
             Room3DContainerView(project: project)
                 .tabItem {
@@ -34,6 +17,57 @@ struct ProjectDetailView: View {
                 }
         }
         .navigationTitle(project.name)
+        .task(id: project.floorplanJSONURL) {
+            await loadFloorplan()
+        }
+    }
+
+    @ViewBuilder
+    private var floorplanTab: some View {
+        Group {
+            if let floorplan {
+                FloorplanView(model: floorplan)
+            } else if let floorplanError {
+                ContentUnavailableView(
+                    "Unable to load floorplan",
+                    systemImage: "exclamationmark.triangle",
+                    description: Text(floorplanError)
+                )
+            } else {
+                if project.floorplanJSONURL == nil {
+                    ContentUnavailableView(
+                        "No floorplan available",
+                        systemImage: "document",
+                        description: Text("This project does not have a saved 2D plan.")
+                    )
+                } else {
+                    ProgressView("Loading floorplan…")
+                }
+            }
+        }
+        .tabItem {
+            Label("2D Plan", systemImage: "square.grid.2x2")
+        }
+    }
+
+    private func loadFloorplan() async {
+        guard let floorplanURL = project.floorplanJSONURL else {
+            return
+        }
+
+        do {
+            let data = try Data(contentsOf: floorplanURL)
+            let decoded = try JSONDecoder().decode(FloorplanModel.self, from: data)
+            await MainActor.run {
+                floorplan = decoded
+                floorplanError = nil
+            }
+        } catch {
+            await MainActor.run {
+                floorplan = nil
+                floorplanError = error.localizedDescription
+            }
+        }
     }
 }
 
