@@ -3,7 +3,6 @@ import RoomPlan
 
 final class RoomCaptureViewController: UIViewController, RoomCaptureSessionDelegate {
     private let roomCaptureView = RoomCaptureView(frame: .zero)
-    private let captureSession = RoomCaptureSession()
     weak var viewModel: RoomScanViewModel?
 
     override func loadView() {
@@ -12,23 +11,22 @@ final class RoomCaptureViewController: UIViewController, RoomCaptureSessionDeleg
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        captureSession.delegate = self
-        roomCaptureView.captureSession = captureSession
+        roomCaptureView.captureSession.delegate = self
     }
 
     func startSession() {
         let configuration = RoomCaptureSession.Configuration()
-        captureSession.run(configuration: configuration)
+        roomCaptureView.captureSession.run(configuration: configuration)
         viewModel?.isScanning = true
     }
 
     func stopSession() {
-        captureSession.stop()
+        roomCaptureView.captureSession.stop()
         viewModel?.isScanning = false
     }
 
     func finishSession() {
-        captureSession.stop()
+        roomCaptureView.captureSession.stop()
     }
 
     func captureSession(_ session: RoomCaptureSession, didUpdate sessionData: CapturedRoom) {
