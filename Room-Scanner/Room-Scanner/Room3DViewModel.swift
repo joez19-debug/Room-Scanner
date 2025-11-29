@@ -1,5 +1,6 @@
 import Foundation
 import RealityKit
+import SwiftUI
 
 @MainActor
 final class Room3DViewModel: ObservableObject {
