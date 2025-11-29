@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import RoomPlan
 import SwiftUI
 
@@ -83,7 +84,7 @@ final class RoomProjectStore: ObservableObject {
         let floorplanData = try encoder.encode(floorplan)
 
         do {
-            try await capturedRoom.export(to: usdzURL)
+            try capturedRoom.export(to: usdzURL)
             try floorplanData.write(to: floorplanURL)
         } catch {
             throw NSError(
