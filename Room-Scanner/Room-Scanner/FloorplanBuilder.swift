@@ -9,13 +9,10 @@ final class FloorplanBuilder {
     /// - Parameter capturedRoom: The room returned by RoomPlan.
     /// - Returns: A `FloorplanModel` containing projected walls, openings, and furniture.
     func build(from capturedRoom: CapturedRoom) -> FloorplanModel {
-        let wallSurfaces = capturedRoom.surfaces.filter { surface in
-            String(describing: surface.category).lowercased() == "wall"
-        }
-        let openingSurfaces = capturedRoom.surfaces.filter { surface in
-            let name = String(describing: surface.category).lowercased()
-            return name.contains("door") || name.contains("window") || name.contains("opening")
-        }
+        // The current RoomPlan API exposes pre-grouped walls and openings; there is
+        // no `surfaces` collection to filter, so read them directly here.
+        let wallSurfaces: [CapturedRoom.Surface] = capturedRoom.walls
+        let openingSurfaces: [CapturedRoom.Surface] = capturedRoom.openings
 
         let walls = buildWalls(from: wallSurfaces)
         let openings = buildOpenings(from: openingSurfaces, walls: walls)
