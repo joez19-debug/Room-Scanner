@@ -1,6 +1,4 @@
 import Foundation
-import SwiftUI
-import Combine
 import RoomPlan
 
 final class RoomScanViewModel: ObservableObject {
