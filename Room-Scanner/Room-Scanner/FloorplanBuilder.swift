@@ -8,8 +8,16 @@ final class FloorplanBuilder {
     /// - Parameter capturedRoom: The room returned by RoomPlan.
     /// - Returns: A `FloorplanModel` containing projected walls, openings, and furniture.
     func build(from capturedRoom: CapturedRoom) -> FloorplanModel {
-        let walls = buildWalls(from: capturedRoom.walls)
-        let openings = buildOpenings(from: capturedRoom.openings, walls: walls)
+        let wallSurfaces = capturedRoom.surfaces.filter { surface in
+            String(describing: surface.category).lowercased() == "wall"
+        }
+        let openingSurfaces = capturedRoom.surfaces.filter { surface in
+            let name = String(describing: surface.category).lowercased()
+            return name.contains("door") || name.contains("window") || name.contains("opening")
+        }
+
+        let walls = buildWalls(from: wallSurfaces)
+        let openings = buildOpenings(from: openingSurfaces, walls: walls)
         let furniture = buildFurniture(from: capturedRoom.objects)
 
         let allPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] } + openings.map { $0.center } + furniture.map { $0.position }
@@ -43,10 +51,13 @@ final class FloorplanBuilder {
             let width = CGFloat(opening.dimensions.x)
             let nearestWallId = nearestWall(for: center, in: walls)?.id
             let kind: OpeningKind
-            switch opening.category {
-            case .door: kind = .door
-            case .window: kind = .window
-            default: kind = .opening
+            let categoryName = String(describing: opening.category).lowercased()
+            if categoryName.contains("door") {
+                kind = .door
+            } else if categoryName.contains("window") {
+                kind = .window
+            } else {
+                kind = .opening
             }
 
             return Opening2D(
