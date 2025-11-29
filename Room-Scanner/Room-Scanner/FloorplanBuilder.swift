@@ -1,6 +1,7 @@
 import Foundation
 import RoomPlan
 import CoreGraphics
+import simd
 
 /// Converts a `CapturedRoom` from RoomPlan into an app-specific `FloorplanModel`.
 final class FloorplanBuilder {
@@ -8,8 +9,13 @@ final class FloorplanBuilder {
     /// - Parameter capturedRoom: The room returned by RoomPlan.
     /// - Returns: A `FloorplanModel` containing projected walls, openings, and furniture.
     func build(from capturedRoom: CapturedRoom) -> FloorplanModel {
-        let walls = buildWalls(from: capturedRoom.walls)
-        let openings = buildOpenings(from: capturedRoom.openings, walls: walls)
+        // The current RoomPlan API exposes pre-grouped walls and openings; there is
+        // no `surfaces` collection to filter, so read them directly here.
+        let wallSurfaces: [CapturedRoom.Surface] = capturedRoom.walls
+        let openingSurfaces: [CapturedRoom.Surface] = capturedRoom.openings
+
+        let walls = buildWalls(from: wallSurfaces)
+        let openings = buildOpenings(from: openingSurfaces, walls: walls)
         let furniture = buildFurniture(from: capturedRoom.objects)
 
         let allPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] } + openings.map { $0.center } + furniture.map { $0.position }
@@ -20,33 +26,38 @@ final class FloorplanBuilder {
 
     // MARK: - Helpers
 
-    private func buildWalls(from walls: [CapturedRoom.Wall]) -> [WallSegment2D] {
+    private func buildWalls(from walls: [CapturedRoom.Surface]) -> [WallSegment2D] {
         walls.compactMap { wall in
-            let points = wall.curve.points
-            guard let first = points.first, let last = points.last else { return nil }
-            let start = projectToPlan(first)
-            let end = projectToPlan(last)
+            // Derive wall endpoints from its transform and width (x-dimension).
+            let halfLength = wall.dimensions.x / 2
+            let startVector = wall.transform * SIMD4<Float>(-halfLength, 0, 0, 1)
+            let endVector = wall.transform * SIMD4<Float>(halfLength, 0, 0, 1)
+            let start = projectToPlan(startVector)
+            let end = projectToPlan(endVector)
 
             return WallSegment2D(
                 id: wall.identifier,
                 start: start,
                 end: end,
-                thickness: CGFloat(wall.thickness),
+                thickness: CGFloat(wall.dimensions.z),
                 isStructural: true
             )
         }
     }
 
-    private func buildOpenings(from openings: [CapturedRoom.Opening], walls: [WallSegment2D]) -> [Opening2D] {
+    private func buildOpenings(from openings: [CapturedRoom.Surface], walls: [WallSegment2D]) -> [Opening2D] {
         openings.map { opening in
             let center = projectToPlan(opening.transform.columns.3)
             let width = CGFloat(opening.dimensions.x)
             let nearestWallId = nearestWall(for: center, in: walls)?.id
             let kind: OpeningKind
-            switch opening.category {
-            case .door: kind = .door
-            case .window: kind = .window
-            default: kind = .opening
+            let categoryName = String(describing: opening.category).lowercased()
+            if categoryName.contains("door") {
+                kind = .door
+            } else if categoryName.contains("window") {
+                kind = .window
+            } else {
+                kind = .opening
             }
 
             return Opening2D(
@@ -68,7 +79,7 @@ final class FloorplanBuilder {
 
             return FurnitureItem2D(
                 id: object.identifier,
-                name: object.category.rawValue.capitalized,
+                name: String(describing: object.category).capitalized,
                 category: category,
                 size: size,
                 height: CGFloat(object.dimensions.y),
@@ -85,8 +96,6 @@ final class FloorplanBuilder {
         case .sofa: return .sofa
         case .chair: return .chair
         case .table: return .table
-        case .cabinet: return .cabinet
-        case .desk: return .desk
         default: return .other
         }
     }
