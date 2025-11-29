@@ -33,6 +33,10 @@ struct WallSegment2D: Identifiable, Codable {
     var end: CGPoint
     var thickness: CGFloat
     var isStructural: Bool
+
+    var length: CGFloat {
+        hypot(end.x - start.x, end.y - start.y)
+    }
 }
 
 /// The type of opening found along a wall.
