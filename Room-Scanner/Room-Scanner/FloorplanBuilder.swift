@@ -18,10 +18,35 @@ final class FloorplanBuilder {
         let openings = buildOpenings(from: openingSurfaces, walls: walls)
         let furniture = buildFurniture(from: capturedRoom.objects)
 
-        let allPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] } + openings.map { $0.center } + furniture.map { $0.position }
-        let bounds = boundingBox(for: allPoints)
+        let initialPoints: [CGPoint] = walls.flatMap { [$0.start, $0.end] } + openings.map { $0.center } + furniture.map { $0.position }
+        let initialBounds = boundingBox(for: initialPoints)
+        let pivot = CGPoint(x: initialBounds.midX, y: initialBounds.midY)
+        let planRotation = dominantRotation(for: walls)
 
-        return FloorplanModel(bounds: bounds, walls: walls, openings: openings, furniture: furniture)
+        let rotatedWalls = walls.map { wall -> WallSegment2D in
+            var rotatedWall = wall
+            rotatedWall.start = rotate(wall.start, around: pivot, by: planRotation)
+            rotatedWall.end = rotate(wall.end, around: pivot, by: planRotation)
+            return rotatedWall
+        }
+
+        let rotatedOpenings = openings.map { opening -> Opening2D in
+            var rotatedOpening = opening
+            rotatedOpening.center = rotate(opening.center, around: pivot, by: planRotation)
+            return rotatedOpening
+        }
+
+        let rotatedFurniture = furniture.map { item -> FurnitureItem2D in
+            var rotatedItem = item
+            rotatedItem.position = rotate(item.position, around: pivot, by: planRotation)
+            rotatedItem.rotation = item.rotation + planRotation
+            return rotatedItem
+        }
+
+        let rotatedPoints: [CGPoint] = rotatedWalls.flatMap { [$0.start, $0.end] } + rotatedOpenings.map { $0.center } + rotatedFurniture.map { $0.position }
+        let bounds = boundingBox(for: rotatedPoints)
+
+        return FloorplanModel(bounds: bounds, walls: rotatedWalls, openings: rotatedOpenings, furniture: rotatedFurniture)
     }
 
     // MARK: - Helpers
@@ -149,5 +174,30 @@ final class FloorplanBuilder {
         let t = max(0, min(1, (ap.x * ab.x + ap.y * ab.y) / abLengthSquared))
         let projection = CGPoint(x: a.x + t * ab.x, y: a.y + t * ab.y)
         return hypot(point.x - projection.x, point.y - projection.y)
+    }
+
+    private func rotate(_ p: CGPoint, around origin: CGPoint, by angle: CGFloat) -> CGPoint {
+        let tx = p.x - origin.x
+        let ty = p.y - origin.y
+        let c = cos(angle)
+        let s = sin(angle)
+        return CGPoint(
+            x: origin.x + tx * c - ty * s,
+            y: origin.y + tx * s + ty * c
+        )
+    }
+
+    private func dominantRotation(for walls: [WallSegment2D]) -> CGFloat {
+        guard let mainWall = walls.max(by: { wallLength($0) < wallLength($1) }) else { return 0 }
+        let dx = mainWall.end.x - mainWall.start.x
+        let dy = mainWall.end.y - mainWall.start.y
+        let angle = atan2(dy, dx)
+        return -angle
+    }
+
+    private func wallLength(_ wall: WallSegment2D) -> CGFloat {
+        let dx = wall.end.x - wall.start.x
+        let dy = wall.end.y - wall.start.y
+        return hypot(dx, dy)
     }
 }
