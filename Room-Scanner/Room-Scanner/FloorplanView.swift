@@ -32,7 +32,7 @@ struct FloorplanView: View {
                     hasInitializedView = true
                 }
             }
-            .onChange(of: model.bounds) { _ in
+            .onChange(of: model.bounds) {
                 if !hasInitializedView {
                     resetView(for: geo.size)
                     hasInitializedView = true
