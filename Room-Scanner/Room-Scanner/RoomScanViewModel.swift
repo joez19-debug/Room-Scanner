@@ -1,5 +1,7 @@
 import Foundation
 import RoomPlan
+import Combine
+import RoomPlan
 
 final class RoomScanViewModel: ObservableObject {
     @Published var isScanning: Bool = false
