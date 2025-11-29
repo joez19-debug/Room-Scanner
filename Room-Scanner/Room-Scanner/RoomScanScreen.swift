@@ -3,6 +3,7 @@ import RoomPlan
 
 struct RoomScanScreen: View {
     @StateObject private var viewModel = RoomScanViewModel()
+    var onFinished: ((RoomProject) -> Void)? = nil
 
     var body: some View {
         VStack {
@@ -16,7 +17,7 @@ struct RoomScanScreen: View {
                 }
                 .disabled(viewModel.isScanning)
 
-                Button(action: viewModel.finishScan) {
+                Button(action: finishScan) {
                     Label("Finish", systemImage: "stop.fill")
                 }
                 .disabled(!viewModel.isScanning)
@@ -26,6 +27,22 @@ struct RoomScanScreen: View {
             Text(viewModel.capturedRoom == nil ? "No capture yet" : "Captured room available")
                 .padding(.bottom)
         }
+    }
+
+    private func finishScan() {
+        viewModel.finishScan()
+
+        let dummyProject = RoomProject(
+            id: UUID(),
+            name: "New Scan",
+            createdAt: Date(),
+            updatedAt: Date(),
+            usdzFileURL: URL(filePath: "/tmp/new-scan.usdz"),
+            floorplanJSONURL: nil,
+            notes: nil
+        )
+
+        onFinished?(dummyProject)
     }
 }
 
