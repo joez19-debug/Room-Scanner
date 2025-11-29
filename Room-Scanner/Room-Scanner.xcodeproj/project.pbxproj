@@ -7,25 +7,59 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		2373247C2EDA73D600A5B55A /* Room-Scanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Room-Scanner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+               2304F2CF2F245643007A3A3B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+               2304F2D02F245643007A3A3B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+               2304F2D12F245643007A3A3B /* Room_ScannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room_ScannerApp.swift; sourceTree = "<group>"; };
+               2304F2D22F245643007A3A3B /* RoomCaptureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomCaptureViewController.swift; sourceTree = "<group>"; };
+               2304F2D32F245643007A3A3B /* RoomCaptureViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomCaptureViewRepresentable.swift; sourceTree = "<group>"; };
+               2304F2D42F245643007A3A3B /* RoomScanScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomScanScreen.swift; sourceTree = "<group>"; };
+               2304F2D52F245643007A3A3B /* RoomScanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomScanViewModel.swift; sourceTree = "<group>"; };
+               2304F2DC2F24569F007A3A3B /* Combine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Combine.framework; path = System/Library/Frameworks/Combine.framework; sourceTree = SDKROOT; };
+               2304F2DE2F2456A6007A3A3B /* RoomPlan.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RoomPlan.framework; path = System/Library/Frameworks/RoomPlan.framework; sourceTree = SDKROOT; };
+               2373247C2EDA73D600A5B55A /* Room-Scanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Room-Scanner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		2373247E2EDA73D600A5B55A /* Room-Scanner */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Room-Scanner";
-			sourceTree = "<group>";
-		};
+               2373247E2EDA73D600A5B55A /* Room-Scanner */ = {
+                       isa = PBXFileSystemSynchronizedRootGroup;
+                       children = (
+                               2304F2DE2F2456A6007A3A3B /* RoomPlan.framework */,
+                               2304F2DC2F24569F007A3A3B /* Combine.framework */,
+                               2304F2D12F245643007A3A3B /* Room_ScannerApp.swift */,
+                               2304F2CF2F245643007A3A3B /* ContentView.swift */,
+                               2304F2D02F245643007A3A3B /* Models.swift */,
+                               2304F2D22F245643007A3A3B /* RoomCaptureViewController.swift */,
+                               2304F2D32F245643007A3A3B /* RoomCaptureViewRepresentable.swift */,
+                               2304F2D52F245643007A3A3B /* RoomScanViewModel.swift */,
+                               2304F2D42F245643007A3A3B /* RoomScanScreen.swift */,
+                       );
+                       path = "Room-Scanner";
+                       sourceTree = "<group>";
+               };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
+/* Begin PBXBuildFile section */
+               2304F2DD2F24569F007A3A3B /* Combine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2304F2DC2F24569F007A3A3B /* Combine.framework */; };
+               2304F2DF2F2456A6007A3A3B /* RoomPlan.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2304F2DE2F2456A6007A3A3B /* RoomPlan.framework */; };
+               2304F2D62F245643007A3A3B /* Room_ScannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2304F2D12F245643007A3A3B /* Room_ScannerApp.swift */; };
+               2304F2D72F245643007A3A3B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2304F2CF2F245643007A3A3B /* ContentView.swift */; };
+               2304F2D82F245643007A3A3B /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2304F2D02F245643007A3A3B /* Models.swift */; };
+               2304F2D92F245643007A3A3B /* RoomCaptureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2304F2D22F245643007A3A3B /* RoomCaptureViewController.swift */; };
+               2304F2DA2F245643007A3A3B /* RoomCaptureViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2304F2D32F245643007A3A3B /* RoomCaptureViewRepresentable.swift */; };
+               2304F2DB2F245643007A3A3B /* RoomScanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2304F2D52F245643007A3A3B /* RoomScanViewModel.swift */; };
+               2304F2DC2F245643007A3A3B /* RoomScanScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2304F2D42F245643007A3A3B /* RoomScanScreen.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFrameworksBuildPhase section */
-		237324792EDA73D600A5B55A /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+                237324792EDA73D600A5B55A /* Frameworks */ = {
+                        isa = PBXFrameworksBuildPhase;
+                        buildActionMask = 2147483647;
+                        files = (
+                               2304F2DD2F24569F007A3A3B /* Combine.framework in Frameworks */,
+                               2304F2DF2F2456A6007A3A3B /* RoomPlan.framework in Frameworks */,
+                        );
+                        runOnlyForDeploymentPostprocessing = 0;
+                };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -115,13 +149,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		237324782EDA73D600A5B55A /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+               237324782EDA73D600A5B55A /* Sources */ = {
+                       isa = PBXSourcesBuildPhase;
+                       buildActionMask = 2147483647;
+                       files = (
+                               2304F2D72F245643007A3A3B /* ContentView.swift in Sources */,
+                               2304F2D62F245643007A3A3B /* Room_ScannerApp.swift in Sources */,
+                               2304F2D82F245643007A3A3B /* Models.swift in Sources */,
+                               2304F2D92F245643007A3A3B /* RoomCaptureViewController.swift in Sources */,
+                               2304F2DA2F245643007A3A3B /* RoomCaptureViewRepresentable.swift in Sources */,
+                               2304F2DB2F245643007A3A3B /* RoomScanViewModel.swift in Sources */,
+                               2304F2DC2F245643007A3A3B /* RoomScanScreen.swift in Sources */,
+                       );
+                       runOnlyForDeploymentPostprocessing = 0;
+               };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
