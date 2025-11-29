@@ -32,6 +32,13 @@ struct RoomScanScreen: View {
             Text(viewModel.capturedRoom == nil ? "No capture yet" : "Captured room available")
                 .padding(.bottom)
 
+            if let scanError = viewModel.scanErrorMessage {
+                Text(scanError)
+                    .foregroundColor(.red)
+                    .padding(.horizontal)
+                    .padding(.bottom)
+            }
+
             if viewModel.capturedRoom != nil {
                 TextField("Project Name", text: $projectName)
                     .textFieldStyle(.roundedBorder)
@@ -60,6 +67,18 @@ struct RoomScanScreen: View {
                 Text(saveError)
             }
         }
+        .alert("Scan Error", isPresented: Binding(
+            get: { viewModel.scanErrorMessage != nil },
+            set: { newValue in
+                if !newValue { viewModel.scanErrorMessage = nil }
+            }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            if let scanErrorMessage = viewModel.scanErrorMessage {
+                Text(scanErrorMessage)
+            }
+        }
     }
 
     private func finishScan() {
@@ -67,7 +86,10 @@ struct RoomScanScreen: View {
     }
 
     private func saveProject() {
-        guard let capturedRoom = viewModel.capturedRoom else { return }
+        guard let capturedRoom = viewModel.capturedRoom else {
+            print("No capturedRoom available; cannot save project")
+            return
+        }
         isSaving = true
 
         Task {
