@@ -1,8 +1,8 @@
 import Foundation
 import RoomPlan
 import Combine
-import RoomPlan
 
+@MainActor
 final class RoomScanViewModel: ObservableObject {
     @Published var isScanning: Bool = false
     @Published var capturedRoom: CapturedRoom?
