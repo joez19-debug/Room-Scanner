@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import RealityKit
 import SwiftUI
@@ -8,7 +9,7 @@ final class Room3DViewModel: ObservableObject {
 
     func loadModel(from url: URL) async {
         do {
-            let loadedModel = try await ModelEntity.load(contentsOf: url)
+            let loadedModel = try await ModelEntity(contentsOf: url)
             modelEntity = loadedModel
         } catch {
             print("Failed to load USDZ model: \(error)")
