@@ -17,12 +17,16 @@ final class RoomCaptureViewController: UIViewController, RoomCaptureSessionDeleg
     func startSession() {
         let configuration = RoomCaptureSession.Configuration()
         roomCaptureView.captureSession.run(configuration: configuration)
-        viewModel?.isScanning = true
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel?.isScanning = true
+        }
     }
 
     func stopSession() {
         roomCaptureView.captureSession.stop()
-        viewModel?.isScanning = false
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel?.isScanning = false
+        }
     }
 
     func finishSession() {
@@ -31,11 +35,15 @@ final class RoomCaptureViewController: UIViewController, RoomCaptureSessionDeleg
 
     func captureSession(_ session: RoomCaptureSession, didUpdate sessionData: CapturedRoom) {
         // Keep track of the latest captured room in case the delegate wants live updates.
-        viewModel?.capturedRoom = sessionData
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel?.capturedRoom = sessionData
+        }
     }
 
     func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoom, error: (any Error)?) {
-        viewModel?.capturedRoom = data
-        viewModel?.isScanning = false
+        DispatchQueue.main.async { [weak self] in
+            self?.viewModel?.capturedRoom = data
+            self?.viewModel?.isScanning = false
+        }
     }
 }
