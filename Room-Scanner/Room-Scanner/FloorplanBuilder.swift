@@ -20,7 +20,7 @@ final class FloorplanBuilder {
 
     // MARK: - Helpers
 
-    private func buildWalls(from walls: [CapturedRoom.Wall]) -> [WallSegment2D] {
+    private func buildWalls(from walls: [RoomPlan.Wall]) -> [WallSegment2D] {
         walls.compactMap { wall in
             let points = wall.curve.points
             guard let first = points.first, let last = points.last else { return nil }
@@ -37,7 +37,7 @@ final class FloorplanBuilder {
         }
     }
 
-    private func buildOpenings(from openings: [CapturedRoom.Opening], walls: [WallSegment2D]) -> [Opening2D] {
+    private func buildOpenings(from openings: [RoomPlan.Opening], walls: [WallSegment2D]) -> [Opening2D] {
         openings.map { opening in
             let center = projectToPlan(opening.transform.columns.3)
             let width = CGFloat(opening.dimensions.x)
