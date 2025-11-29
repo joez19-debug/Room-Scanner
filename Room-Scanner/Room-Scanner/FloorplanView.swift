@@ -10,11 +10,42 @@ struct FloorplanView: View {
     @State private var lastOffset: CGSize = .zero
     @State private var hasInitializedView = false
 
+    private var planBounds: CGRect {
+        var minX = CGFloat.greatestFiniteMagnitude
+        var maxX = -CGFloat.greatestFiniteMagnitude
+        var minY = CGFloat.greatestFiniteMagnitude
+        var maxY = -CGFloat.greatestFiniteMagnitude
+
+        // walls
+        for wall in model.walls {
+            minX = min(minX, wall.start.x, wall.end.x)
+            maxX = max(maxX, wall.start.x, wall.end.x)
+            minY = min(minY, wall.start.y, wall.end.y)
+            maxY = max(maxY, wall.start.y, wall.end.y)
+        }
+
+        // furniture centers (optionally expand by half size)
+        for item in model.furniture {
+            let halfW = item.size.width / 2.0
+            let halfH = item.size.height / 2.0
+            minX = min(minX, item.position.x - halfW)
+            maxX = max(maxX, item.position.x + halfW)
+            minY = min(minY, item.position.y - halfH)
+            maxY = max(maxY, item.position.y + halfH)
+        }
+
+        if minX == .greatestFiniteMagnitude {
+            return .zero
+        }
+        return CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+    }
+
     var body: some View {
         GeometryReader { geo in
             Canvas { context, size in
-                let midX = model.bounds.midX
-                let midY = model.bounds.midY
+                let bounds = planBounds
+                let midX = bounds.midX
+                let midY = bounds.midY
                 let transform = CGAffineTransform.identity
                     .translatedBy(x: size.width / 2, y: size.height / 2)
                     .translatedBy(x: offset.width, y: offset.height)
@@ -32,7 +63,7 @@ struct FloorplanView: View {
                     hasInitializedView = true
                 }
             }
-            .onChange(of: model.bounds) {
+            .onChange(of: planBounds) {
                 if !hasInitializedView {
                     resetView(for: geo.size)
                     hasInitializedView = true
@@ -122,7 +153,7 @@ struct FloorplanView: View {
     }
 
     private func resetView(for size: CGSize) {
-        let bounds = model.bounds
+        let bounds = planBounds
         guard bounds.width > 0, bounds.height > 0 else { return }
 
         let availableWidth = size.width
