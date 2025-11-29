@@ -14,7 +14,7 @@ private enum Route: Hashable {
 
 struct ContentView: View {
     @StateObject private var projectStore: ProjectStore
-    @State private var path = NavigationPath()
+    @State private var path: [Route] = []
 
     init(projectStore: ProjectStore = ProjectStore()) {
         _projectStore = StateObject(wrappedValue: projectStore)
