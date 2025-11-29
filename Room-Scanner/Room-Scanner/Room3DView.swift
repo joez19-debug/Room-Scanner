@@ -19,7 +19,9 @@ struct Room3DView: UIViewRepresentable {
 
         let cameraAnchor = AnchorEntity(world: .zero)
         let camera = PerspectiveCamera()
-        camera.transform = Transform(pitch: -.pi / 12, yaw: .pi, roll: 0, translation: [0, 1.5, 3])
+        var cameraTransform = Transform(pitch: -.pi / 12, yaw: .pi, roll: 0)
+        cameraTransform.translation = [0, 1.5, 3]
+        camera.transform = cameraTransform
         cameraAnchor.addChild(camera)
         arView.scene.addAnchor(cameraAnchor)
 
